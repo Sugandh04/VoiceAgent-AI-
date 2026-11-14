@@ -15,7 +15,6 @@ class CallStatus(str, enum.Enum):
 
 class Call(Base):
     __tablename__ = "calls"
-
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     call_sid = Column(String(100), unique=True, index=True, nullable=False)
@@ -29,16 +28,17 @@ class Call(Base):
     duration_seconds = Column(Integer, default=0)
     recording_url = Column(String(500), nullable=True)
     custom_field = Column(String(255), nullable=True)
-    
+    # Stores a JSON string of the AI-generated post-call summary
+    # (see app/services/post_call_summary.py for the schema)
+    summary = Column(Text, nullable=True)
+
     turns = relationship("ConversationTurn", back_populates="call", cascade="all, delete-orphan")
 
 class ConversationTurn(Base):
     __tablename__ = "conversation_turns"
-
     id = Column(Integer, primary_key=True, index=True)
     call_sid = Column(String(100), ForeignKey("calls.call_sid"), nullable=False, index=True)
-    speaker = Column(String(20), nullable=False) # "USER" or "BOT"
+    speaker = Column(String(20), nullable=False)
     text = Column(Text, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
-
     call = relationship("Call", back_populates="turns")

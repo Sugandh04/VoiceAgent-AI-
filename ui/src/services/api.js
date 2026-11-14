@@ -46,6 +46,10 @@ class ApiService {
       throw new Error(errData.detail || `Request failed (${response.status})`);
     }
 
+    if (response.status === 204) {
+      return null;
+    }
+
     return await response.json();
   }
 
@@ -118,6 +122,41 @@ class ApiService {
 
   pauseCampaign(id) {
     return this.request(`/api/campaigns/${id}/pause`, { method: "POST" });
+  }
+
+  // Call Content (Scripts / Seasonal Prompts)
+  getCallContents() {
+    return this.request("/api/call-content");
+  }
+
+  getActiveCallContent() {
+    return this.request("/api/call-content/active");
+  }
+
+  createCallContent(data) {
+    return this.request("/api/call-content", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  updateCallContent(id, data) {
+    return this.request(`/api/call-content/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  deleteCallContent(id) {
+    return this.request(`/api/call-content/${id}`, { method: "DELETE" });
+  }
+
+  activateCallContent(id) {
+    return this.request(`/api/call-content/${id}/activate`, { method: "POST" });
+  }
+
+  deactivateAllCallContent() {
+    return this.request("/api/call-content/deactivate", { method: "POST" });
   }
 }
 

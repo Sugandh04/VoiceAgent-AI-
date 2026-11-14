@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -12,7 +12,9 @@ from app.models.call import Call, CallStatus
 from app.models.user import User
 from app.schemas.call import OutboundCallRequest, OutboundCallResponse, CallDetailSchema
 from app.services.exotel_service import exotel_service
-from app.routers.auth_router import get_current_user
+from app.routers.auth_router import get_current_user, require_user
+from app.routers.ws_router import broadcast_event
+from app.cache import cache
 
 router = APIRouter(prefix="/api/calls", tags=["Calls"])
 
@@ -36,15 +38,21 @@ async def initiate_call(
     new_call = Call(
         user_id=user_id,
         call_sid=call_sid,
-        from_number=req.to,
+        from_number="VoiceAgent-AI",
+        to_number=req.to,
         caller_id="VoiceAgent-AI",
         status=CallStatus.QUEUED,
-        start_time=datetime.utcnow(),
+        start_time=datetime.now(timezone.utc),
         custom_field=req.customField
     )
     db.add(new_call)
     await db.commit()
     await db.refresh(new_call)
+
+    # Invalidate dashboard cache for this user
+    if user_id:
+        await cache.delete(f"dashboard:stats:{user_id}")
+        await broadcast_event("CALL_STARTED", {"call_sid": call_sid, "to": req.to}, user_id=user_id)
 
     # Optional: Trigger Exotel PSTN dial if phone number format
     if req.to and req.to.startswith("+91") and settings.EXOTEL_ACCOUNT_SID:
@@ -58,17 +66,18 @@ async def initiate_call(
 
 @router.get("", response_model=List[CallDetailSchema])
 async def list_calls(
-    current_user: Optional[User] = Depends(get_current_user),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    limit: int = Query(50, ge=1, le=200, description="Pagination limit"),
+    current_user: User = Depends(require_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """List recent call sessions and their turn-by-turn history for current user."""
-    if not current_user:
-        return []
+    """List recent call sessions, turns, and AI post-call summaries for current user."""
     result = await db.execute(
         select(Call)
         .options(selectinload(Call.turns))
         .where(Call.user_id == current_user.id)
         .order_by(Call.start_time.desc())
-        .limit(50)
+        .offset(offset)
+        .limit(limit)
     )
     return result.scalars().all()

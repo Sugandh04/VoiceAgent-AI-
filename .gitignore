@@ -1,63 +1,57 @@
-# Python
+# ── Secrets & Environment ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Database files ────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+voice_agent.db
+
+# ── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
+*.pyd
 *.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual Environment
 venv/
 .venv/
 env/
 ENV/
-env.bak/
-venv.bak/
+*.egg-info/
+dist/
+build/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+htmlcov/
+.pytest_cache/
+*.egg
 
-# Environment Variables & Secrets
-.env
-.env.local
-*.env
-!.env.example
-
-# Local SQLite Database
-*.db
-*.sqlite3
-
-# Node / UI
-node_modules/
+# ── Node / Frontend ───────────────────────────────────────────────────────────
 ui/node_modules/
 ui/dist/
-ui/dist-ssr/
-*.local
+ui/.vite/
+node_modules/
 
-# Logs
-*.log
-logs/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# IDE & Editor files
+# ── IDE & Editor ─────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 .DS_Store
 Thumbs.db
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
+livekit-agent.log
+
+# ── LiveKit / Temp ───────────────────────────────────────────────────────────
+*.pid
+.tmp/
+tmp/

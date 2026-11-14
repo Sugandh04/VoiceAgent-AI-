@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     const token = api.getToken();
     if (!token) {
       setLoading(false);
-      setShowAuthModal(true);
+      setShowAuthModal(false);
       return;
     }
 
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       api.setToken(null);
       setUser(null);
-      setShowAuthModal(true);
+      setShowAuthModal(false);
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     api.setToken(null);
     setUser(null);
-    setShowAuthModal(true);
+    setShowAuthModal(false);
   };
 
   return (
