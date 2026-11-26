@@ -53,10 +53,14 @@ async def get_exoml(request: Request, db: AsyncSession = Depends(get_db)):
         base_url = base_url.replace("http://", "https://")
     callback_url = f"{base_url}/api/exotel/callback"
 
+    # Fallback only: speak the greeting, then end the call cleanly via the status
+    # callback. The real AI conversation runs through the Exotel Voicebot applet,
+    # which streams audio to PUBLIC_WS_URL (/ws/voice-bot). Do NOT use this endpoint
+    # as the outbound flow URL for live AI calls.
     exoml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Say voice="woman" language="en-IN">{safe_greeting}</Say>
-    <Record action="{callback_url}" maxLength="120" />
+    <Hangup/>
 </Response>"""
 
     return Response(content=exoml.strip(), media_type="application/xml")
@@ -89,9 +93,9 @@ async def exotel_status_callback(request: Request, db: AsyncSession = Depends(ge
         if call_obj:
             if status_str in ["completed"]:
                 call_obj.status = CallStatus.COMPLETED
-            elif status_str in ["in-progress", "busy", "ringing"]:
+            elif status_str in ["in-progress", "ringing", "answered"]:
                 call_obj.status = CallStatus.IN_PROGRESS
-            elif status_str in ["failed", "no-answer", "canceled"]:
+            elif status_str in ["failed", "no-answer", "busy", "canceled"]:
                 call_obj.status = CallStatus.FAILED
 
             if duration > 0:

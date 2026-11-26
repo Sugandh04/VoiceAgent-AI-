@@ -38,6 +38,7 @@ from app.routers.campaign_router import router as campaign_router
 from app.routers.auth_router import router as auth_router
 from app.routers.call_content_router import router as call_content_router
 from app.routers.exotel_router import router as exotel_router
+from app.routers.websocket_router import router as voice_bot_router
 from app.routers.ws_router import (
     router as ws_router,
     start_redis_subscriber,
@@ -148,6 +149,7 @@ app.include_router(campaign_router)
 app.include_router(call_content_router)   # ← Dynamic call scripts
 app.include_router(ws_router)             # ← Live dashboard WebSocket
 app.include_router(exotel_router)         # ← Exotel Telephony Webhooks & ExoML
+app.include_router(voice_bot_router)      # ← /ws/voice-bot: Exotel media stream (AI conversation)
 
 # ── Health check ─────────────────────────────────────────────────────────────
 

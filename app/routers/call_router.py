@@ -76,7 +76,14 @@ async def initiate_call(
             )
         else:
             _recent_dials[norm_number] = now
-            await exotel_service.initiate_outbound_call(destination_number=req.to, custom_field=call_sid)
+            result = await exotel_service.initiate_outbound_call(destination_number=req.to, custom_field=call_sid)
+            exotel_sid = result.get("call_sid") if isinstance(result, dict) else None
+            if exotel_sid:
+                # Exotel streams audio tagged with ITS call id; adopt it so the transcript,
+                # booking and analysis attach to this call record.
+                new_call.call_sid = exotel_sid
+                await db.commit()
+                call_sid = exotel_sid
 
     return OutboundCallResponse(
         callSid=call_sid,

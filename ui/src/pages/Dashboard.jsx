@@ -53,12 +53,16 @@ export default function Dashboard({ setActiveTab }) {
 
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
+  const unmountedRef = useRef(false);
 
   useEffect(() => {
+    unmountedRef.current = false;
     fetchDashboardData();
     setupWebSocket();
 
     return () => {
+      // Stop the onclose handler from scheduling a reconnect after leaving the page.
+      unmountedRef.current = true;
       if (wsRef.current) {
         wsRef.current.close();
       }
@@ -112,7 +116,7 @@ export default function Dashboard({ setActiveTab }) {
           } else if (data.event === "CALL_STARTED") {
             setLastLiveEvent(`📞 Call started: ${data.payload?.to || "Browser"}`);
             fetchDashboardData();
-          } else if (data.event === "CALL_ENDED") {
+          } else if (data.event === "CALL_ENDED" || data.event === "CALL_UPDATED") {
             setLastLiveEvent("Call ended & sentiment analyzed");
             fetchDashboardData();
           } else if (data.event === "LEAD_ADDED" || data.event === "LEAD_DELETED") {
@@ -125,6 +129,7 @@ export default function Dashboard({ setActiveTab }) {
 
       ws.onclose = () => {
         setWsConnected(false);
+        if (unmountedRef.current) return;
         reconnectTimeoutRef.current = setTimeout(() => {
           setupWebSocket();
         }, 5000);
