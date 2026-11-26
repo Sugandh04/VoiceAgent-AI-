@@ -19,6 +19,7 @@ import {
   Activity,
   Cpu,
   Layers,
+  Mic,
 } from "lucide-react";
 import { api } from "../services/api";
 import VoiceOrb3D from "../components/VoiceOrb3D";
@@ -385,6 +386,23 @@ export default function Dashboard({ setActiveTab }) {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 className="btn btn-primary"
+                onClick={() => window.dispatchEvent(new CustomEvent("open:voice-studio"))}
+                style={{
+                  background: "linear-gradient(135deg, var(--sarvam-orange), #ea580c)",
+                  boxShadow: "0 4px 16px var(--sarvam-orange-glow)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "7px",
+                  fontWeight: 700,
+                }}
+              >
+                <Mic size={15} />
+                <span>Test Voice Agent (Live)</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="btn btn-outline"
                 onClick={() => setActiveTab("content")}
               >
                 <Zap size={14} />

@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     EXOTEL_API_TOKEN: Optional[str] = None
     EXOTEL_CALLER_ID: Optional[str] = None
     EXOTEL_APP_ID: Optional[str] = None
+    EXOTEL_EXOML_URL: Optional[str] = None
 
     # ── WhatsApp Cloud API ────────────────────────────────────────────────────
     WHATSAPP_ACCESS_TOKEN: Optional[str] = None
